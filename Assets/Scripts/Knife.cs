@@ -44,7 +44,12 @@ namespace Game
                 //hit the target
                 _used = true;
                 _rigidbody.isKinematic = true;
-                Attach(other.gameObject.transform, other.gameObject.transform.position - Vector3.up * GameManager.DISTANCE_KNIFE);
+                if (KnifeBlock.Instance.KnivesLeft > 0)
+                {   
+                    Attach(other.gameObject.transform, other.gameObject.transform.position - Vector3.up * GameManager.DISTANCE_KNIFE);
+                    //the last knife won't be attached, it will go through
+                }
+               
                 GameEvents.OnKnifeAttached();
             }
         }

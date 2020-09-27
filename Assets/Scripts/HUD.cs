@@ -11,6 +11,7 @@ namespace Game
         public static HUD Instance = null;
 
         #region private fields
+        private bool _refreshLevels;
         #endregion private fields
 
         #region unity event functions
@@ -22,33 +23,79 @@ namespace Game
 
         private void OnEnable()
         {
+            GameEvents.StartedGame += OnStartedGame;
             GameEvents.KnivesCreated += OnKnivesCreated;
             GameEvents.KnifeFired += OnKnifeFired;
             GameEvents.SecondChangeGiven += OnSecondChangeGiven;
+            GameEvents.LevelFinishedClearing += OnLevelFinishedClearing;
+            GameEvents.RestartedGame += OnRestartedGame;
+            GameEvents.BossDefeated += OnBossDefeated;
         }
 
         private void OnDisable()
         {
+            GameEvents.StartedGame -= OnStartedGame;
             GameEvents.KnivesCreated -= OnKnivesCreated;
             GameEvents.KnifeFired -= OnKnifeFired;
             GameEvents.SecondChangeGiven -= OnSecondChangeGiven;
+            GameEvents.LevelFinishedClearing -= OnLevelFinishedClearing;
+            GameEvents.RestartedGame -= OnRestartedGame;
+            GameEvents.BossDefeated -= OnBossDefeated;
         }
         #endregion unity event functions
 
         #region private functions
+        private void OnStartedGame()
+        {
+            KnivesCounterHUD.Instance.Show();
+            LevelsHUD.Instance.Reset(); 
+            LevelsHUD.Instance.Show();
+        }
+
         private void OnKnivesCreated(int knives)
         {
-            KnivesCounter.Instance.DisplayKnives(knives);
+            KnivesCounterHUD.Instance.DisplayKnives(knives);
         }
 
         private void OnKnifeFired()
         {
-            KnivesCounter.Instance.UseKnife();
+            KnivesCounterHUD.Instance.UseKnife();
         }
 
         private void OnSecondChangeGiven()
         {
-            KnivesCounter.Instance.RecoverKnife();
+            KnivesCounterHUD.Instance.RecoverKnife();
+        }
+
+        private void OnLevelFinishedClearing()
+        {
+            if (_refreshLevels)
+            {
+                _refreshLevels = false;
+                RefreshLevels();
+            }
+            else
+            {
+                LevelsHUD.Instance.IncreaseLevel();
+            }
+            LevelsHUD.Instance.HighlightLevel();
+        }
+
+        private void OnRestartedGame()
+        {
+            RefreshLevels();
+        }
+
+        private void OnBossDefeated()
+        {
+            _refreshLevels = true;
+            LevelsHUD.Instance.Hide();
+        }
+
+        private void RefreshLevels()
+        {
+            LevelsHUD.Instance.Reset();
+            LevelsHUD.Instance.Show();
         }
         #endregion private functions
     }

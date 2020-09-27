@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 namespace Game
 {
@@ -22,8 +23,9 @@ namespace Game
         #region private fields
         [SerializeField] private GameObject _knifePrefab;
         [SerializeField] private Queue<GameObject> _knives;
-        [SerializeField] private Queue<GameObject> _usedknives;
+        [SerializeField] private List<GameObject> _usedknives;
         private GameObject _currentKnife;
+        private Vector3 _knifeOriginalScale;
         #endregion private fields
 
         #region unity event functions
@@ -31,7 +33,9 @@ namespace Game
         {
             Instance = this;
             _knives = new Queue<GameObject>();
-            _usedknives = new Queue<GameObject>();
+            _usedknives = new List<GameObject>();
+
+            CreateKnives(1);
         }
         #endregion unity event functions
 
@@ -53,15 +57,22 @@ namespace Game
 
             while (_usedknives.Count > 0)
             {
-                var knive = _usedknives.Dequeue();
+                var knive = _usedknives[0];
                 Destroy(knive);
+                _usedknives.RemoveAt(0);
             }
 
-            _usedknives = new Queue<GameObject>();
+            _usedknives = new List<GameObject>();
         }
         #endregion private functions
 
         #region public functions
+        public void Show()
+        {
+            transform.DOMoveY(GameManager.Y_KNIFE_BLOCK, GameManager.DURATION_1).
+                OnComplete(() => { ControllsEnabled = true; });
+        }
+
         public void ReadyKnife()
         {
             if (_knives.Count > 0)
@@ -84,11 +95,16 @@ namespace Game
             for(int i = 0; i < knives; i++)
             {
                 GameObject newKnife = Instantiate(_knifePrefab);
+                newKnife.transform.SetParent(transform);
                 newKnife.SetActive(false);
                 _knives.Enqueue(newKnife);
             }
 
             ReadyKnife();
+
+            _knifeOriginalScale = _currentKnife.transform.localScale;
+            _currentKnife.transform.localScale = Vector3.zero;
+            _currentKnife.transform.DOScale(_knifeOriginalScale, GameManager.DURATION_0);
 
             GameEvents.OnKnivesCreated(knives);
         }
@@ -104,7 +120,7 @@ namespace Game
             {
                 Knife knifeComponent = _currentKnife.GetComponent<Knife>();
                 knifeComponent.SetVelocity(Vector3.up * GameManager.SPEED_KNIFE);
-                _usedknives.Enqueue(_currentKnife);
+                _usedknives.Add(_currentKnife);
                 _currentKnife = null;
 
                 GameEvents.OnKnifeFired();
@@ -132,6 +148,21 @@ namespace Game
             _knives.Enqueue(newKnife);
 
             ReadyKnife();
+        }
+
+        public void ShakeOffKnives()
+        {
+            foreach(var knife in _usedknives)
+            {
+                var randomDirection = new Vector3(
+                            Random.Range(180, -180) + 1,
+                            Random.Range(180, -180) + 1,
+                            Random.Range(180, -180) + 1).normalized;
+                knife.transform.SetParent(transform);
+                knife.GetComponent<Knife>().
+                    SetVelocity(randomDirection * GameManager.SPEED_KNIFE);
+                knife.transform.rotation = Quaternion.LookRotation(randomDirection);
+            }
         }
         #endregion public functions
     }

@@ -5,10 +5,10 @@ using UnityEngine.UI;
 
 namespace Game
 {
-    public class KnivesCounter : MonoBehaviour
+    public class KnivesCounterHUD : MonoBehaviour
     {
         //reference
-        public static KnivesCounter Instance = null;
+        public static KnivesCounterHUD Instance = null;
 
         #region private fields
         [SerializeField] private GameObject _knifeIconPrefab;
@@ -65,6 +65,11 @@ namespace Game
         {
             _currentIconIndex--;
             _icons[_currentIconIndex].SetAvailable();
+        }
+
+        public void Show()
+        {
+            _iconsParent.gameObject.SetActive(true);
         }
         #endregion public functions
     }

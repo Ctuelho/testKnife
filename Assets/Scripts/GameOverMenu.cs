@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -15,6 +13,7 @@ namespace Game
         [SerializeField] private CanvasGroup _raycastGroup;
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _adButton;
+        [SerializeField] private Image _timer;
         private bool _restartClicked = false;
         private bool _adClicked = false;
         #endregion private fields
@@ -30,7 +29,8 @@ namespace Game
             });
 
             _adButton.onClick.AddListener(() => {
-                _adClicked = true; 
+                _adClicked = true;
+                _timer.DOKill();
                 Hide();
             });
         }
@@ -40,11 +40,25 @@ namespace Game
         public void Show()
         {
             _restartClicked = false;
-            _adClicked = false;
-            _adButton.gameObject.SetActive(GameManager.Instance.ADAvailable);
+            _adClicked = false;         
+            if (GameManager.Instance.ADAvailable)
+            {
+                _adButton.gameObject.SetActive(true);
+                _restartButton.gameObject.SetActive(false);
+                _timer.fillAmount = 1;
+                _timer.DOFillAmount(0, GameManager.DURATION_3).OnComplete(()=> 
+                {
+                    GameEvents.OnAdTimerEnded();
+                });
+            }
+            else
+            {
+                _adButton.gameObject.SetActive(false);
+                _restartButton.gameObject.SetActive(true);
+            }
             _panel.transform.localScale = Vector3.zero;
             _panel.gameObject.SetActive(true);
-            _panel.transform.DOScale(Vector3.one, 0.5f).
+            _panel.transform.DOScale(Vector3.one, GameManager.DURATION_1).
                 SetEase(Ease.OutBounce).
                     OnComplete(() => { _raycastGroup.blocksRaycasts = true; });
         }
@@ -52,16 +66,15 @@ namespace Game
         public void Hide()
         {
             _raycastGroup.blocksRaycasts = false;
-            _panel.transform.DOScale(Vector3.zero, 0.5f).
+            if (_restartClicked)
+            {
+                //restart the game
+                GameEvents.OnRestartedGame();
+            }
+            _panel.transform.DOScale(Vector3.zero, GameManager.DURATION_1).
                 SetEase(Ease.InBounce)
-                    .OnComplete(() => 
-                    {
-                        if (_restartClicked)
-                        {
-                            //restart the game
-                            GameEvents.OnRestartedGame();
-                        }
-                        else if (_adClicked)
+                    .OnComplete(() => {                      
+                        if (_adClicked)
                         {
                             //give one knife
                             GameEvents.OnSecondChangeGiven();
