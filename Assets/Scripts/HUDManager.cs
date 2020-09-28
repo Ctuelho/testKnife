@@ -1,21 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 namespace Game
 {
-    public class HUD : MonoBehaviour
+    //controls the HUD state
+    public class HUDManager : MonoBehaviour
     {
         //reference
-        public static HUD Instance = null;
+        public static HUDManager Instance = null;
 
         #region private fields
         private bool _refreshLevels;
         #endregion private fields
 
         #region unity event functions
-        // Start is called before the first frame update
         void Awake()
         {
             Instance = this;
@@ -30,6 +27,8 @@ namespace Game
             GameEvents.LevelFinishedClearing += OnLevelFinishedClearing;
             GameEvents.RestartedGame += OnRestartedGame;
             GameEvents.BossDefeated += OnBossDefeated;
+            GameEvents.PointsChanged += OnPointsChanged;
+            GameEvents.ApplesChanged += OnApplesChanged;
         }
 
         private void OnDisable()
@@ -41,6 +40,8 @@ namespace Game
             GameEvents.LevelFinishedClearing -= OnLevelFinishedClearing;
             GameEvents.RestartedGame -= OnRestartedGame;
             GameEvents.BossDefeated -= OnBossDefeated;
+            GameEvents.PointsChanged -= OnPointsChanged;
+            GameEvents.ApplesChanged -= OnApplesChanged;
         }
         #endregion unity event functions
 
@@ -92,10 +93,21 @@ namespace Game
             LevelsHUD.Instance.Hide();
         }
 
+        //refreshes the levels HUD
         private void RefreshLevels()
         {
             LevelsHUD.Instance.Reset();
             LevelsHUD.Instance.Show();
+        }
+
+        private void OnPointsChanged()
+        {
+            PointsHUD.Instance.Refresh();
+        }
+
+        private void OnApplesChanged()
+        {
+            ApplesHUD.Instance.Refresh();
         }
         #endregion private functions
     }

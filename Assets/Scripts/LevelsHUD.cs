@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 using DG.Tweening;
 
 namespace Game
 {
+    //displays the level progression
     public class LevelsHUD : MonoBehaviour
     {
         //reference

@@ -83,6 +83,16 @@ namespace Game
                         _panel.gameObject.SetActive(false);
                     });
         }
+
+        public void EnableInteractions()
+        {
+            _raycastGroup.blocksRaycasts = true;
+        }
+
+        public void DisableInteractions()
+        {
+            _raycastGroup.blocksRaycasts = false;
+        }
         #endregion public functions
     }
 }

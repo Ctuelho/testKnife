@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
@@ -35,6 +34,10 @@ namespace Game
             _knives = new Queue<GameObject>();
             _usedknives = new List<GameObject>();
 
+        }
+
+        private void Start()
+        {
             CreateKnives(1);
         }
         #endregion unity event functions
@@ -73,6 +76,7 @@ namespace Game
                 OnComplete(() => { ControllsEnabled = true; });
         }
 
+        //sets the next knife in the queue ready to be used
         public void ReadyKnife()
         {
             if (_knives.Count > 0)
@@ -88,6 +92,7 @@ namespace Game
             }
         }
 
+        //create all the knives of the current level
         public void CreateKnives(int knives)
         {
             ClearKnives();
@@ -98,6 +103,7 @@ namespace Game
                 newKnife.transform.SetParent(transform);
                 newKnife.SetActive(false);
                 _knives.Enqueue(newKnife);
+                newKnife.GetComponent<SpriteRenderer>().color = GameManager.Instance.KnifeColor;
             }
 
             ReadyKnife();
@@ -125,10 +131,6 @@ namespace Game
 
                 GameEvents.OnKnifeFired();
             }
-            else
-            {
-                Debug.Log("Out of knives");
-            }
         }
 
         public void EnableControlls()
@@ -141,19 +143,23 @@ namespace Game
             ControllsEnabled = false;
         }
 
+        //adds one extra knife
         public void AddKnife()
         {
             GameObject newKnife = Instantiate(_knifePrefab);
             newKnife.SetActive(false);
             _knives.Enqueue(newKnife);
-
+            newKnife.GetComponent<SpriteRenderer>().color = GameManager.Instance.KnifeColor;
             ReadyKnife();
         }
 
+        //animates the knives for the target's explosion at the end of the level
         public void ShakeOffKnives()
         {
-            foreach(var knife in _usedknives)
+            for(int i = 0; i < _usedknives.Count-1; i++)
             {
+                var knife = _usedknives[i];
+                //just create a random force direction
                 var randomDirection = new Vector3(
                             Random.Range(180, -180) + 1,
                             Random.Range(180, -180) + 1,

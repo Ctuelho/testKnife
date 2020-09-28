@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Game
 {
+    //holds and displays the number of knives left/used by the player
     public class KnivesCounterHUD : MonoBehaviour
     {
         //reference

@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
-namespace Game {
+namespace Game 
+{
     public class LevelIcon : MonoBehaviour
     {
         #region private fields

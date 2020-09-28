@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -29,12 +27,12 @@ namespace Game
 
             _rankingButton.onClick.AddListener(() => {
                 _rankingClicked = true;
-                Hide();
+                ClickChildMenu();
             });
 
             _knifeStoreButton.onClick.AddListener(() => {
                 _knifeStoreClicked = true;
-                Hide();
+                ClickChildMenu();
             });
 
             _playButton.onClick.AddListener(() => {
@@ -48,9 +46,30 @@ namespace Game
         }
         #endregion unity event functions
 
+        #region private functions
+        //show a child menu
+        private void ClickChildMenu() 
+        {
+            _raycastGroup.blocksRaycasts = false;
+            if (_knifeStoreClicked)
+            {
+                //shows the knife store
+                _knifeStoreClicked = false;
+                GameEvents.OnKnifeStoreOpen();
+            }
+            else if (_rankingClicked)
+            {
+                //show the ranking
+                _rankingClicked = false;
+                GameEvents.OnRankingMenuOpen();
+            }
+        }
+        #endregion private functions
+
         #region public functions
         public void Show()
         {
+            _raycastGroup.blocksRaycasts = false;
             _rankingClicked = false;
             _knifeStoreClicked = false;
             _playClicked = false;
@@ -64,28 +83,31 @@ namespace Game
         public void Hide()
         {
             _raycastGroup.blocksRaycasts = false;
-            _panel.transform.DOScale(Vector3.zero, GameManager.DURATION_1).
-                SetEase(Ease.InBounce)
-                    .OnComplete(() => {
-                        if (_playClicked)
-                        {
-                            //start the game
-                            _playButton.gameObject.SetActive(false);
-                            GameEvents.OnStartedGame();
-                        }
-                        else if (_knifeStoreClicked)
-                        {
-                            //show the knife store
-                            GameEvents.OnKnifeStoreOpen();
-                        }
-                        else if (_rankingClicked)
-                        {
-                            //show the rank store
-                            GameEvents.OnKnifeStoreOpen();
-                        }
+            if (_playClicked)
+            {
+                //start the game
+                _playButton.gameObject.SetActive(false);
+                _playClicked = false;
+                GameEvents.OnStartedGame();
+            }
 
-                        _panel.gameObject.SetActive(false);
-                    });
+            _panel.transform.DOScale(Vector3.zero, GameManager.DURATION_1).
+                    SetEase(Ease.InBounce).OnComplete(() => { _panel.gameObject.SetActive(false); });
+        }
+
+        public void SetInteractionsEnabled()
+        {
+            _raycastGroup.blocksRaycasts = true;
+        }
+
+        public void DisablePlayButton()
+        {
+            _playButton.interactable = false;
+        }
+
+        public void EnablePlayButton()
+        {
+            _playButton.interactable = true;
         }
         #endregion public functions
     }

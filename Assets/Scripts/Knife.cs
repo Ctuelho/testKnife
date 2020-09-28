@@ -17,6 +17,8 @@ namespace Game
         #region private fields
         [SerializeField] private Rigidbody2D _rigidbody;
         [SerializeField] private Collider2D _collider;
+        [SerializeField] private ParticleSystem _hit;
+        [SerializeField] private ParticleSystem _break;
         private bool _used;
         #endregion private fields
 
@@ -28,6 +30,7 @@ namespace Game
                 return;
             }
 
+            //checks collision with another knife
             if(other.gameObject.layer == GameManager.LAYER_USED_KNIVES)
             {
                 _used = true;
@@ -36,10 +39,12 @@ namespace Game
                 _collider.enabled = false;
 
                 GetComponent<SpriteRenderer>().color = Color.red;
+                _break.Play();
 
                 GameEvents.OnKnifeBroken();
             }
-            else if(other.gameObject.layer == GameManager.LAYER_TARGET)
+            //checks collision with target
+            else if (other.gameObject.layer == GameManager.LAYER_TARGET)
             {
                 //hit the target
                 _used = true;
@@ -47,7 +52,8 @@ namespace Game
                 if (KnifeBlock.Instance.KnivesLeft > 0)
                 {   
                     Attach(other.gameObject.transform, other.gameObject.transform.position - Vector3.up * GameManager.DISTANCE_KNIFE);
-                    //the last knife won't be attached, it will go through
+                    _hit.Play();
+                    //the last knife won't be attached, it will go through the target
                 }
                
                 GameEvents.OnKnifeAttached();
@@ -56,15 +62,13 @@ namespace Game
         #endregion unity event functions
 
         #region public functions
-        /// <summary>
-        /// Sets the knife's velocity
-        /// </summary>
-        /// <param name="veclocity">A vector3 representing the velocity</param>
+        //sets the knife in motion
         public void SetVelocity(Vector3 veclocity)
         {
             _rigidbody.velocity = veclocity;
         }
 
+        //attachs the knife to the target, and it becomes an obstacle
         public void Attach(Transform parent, Vector3 position)
         {
             _rigidbody.velocity = Vector3.zero;
@@ -72,6 +76,7 @@ namespace Game
             transform.SetParent(parent);
             transform.position = position;
 
+            //move the knife to a layer where it can work as an obstacle
             gameObject.layer = GameManager.LAYER_USED_KNIVES;
         }
         #endregion public functions
